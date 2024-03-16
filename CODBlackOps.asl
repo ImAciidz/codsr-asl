@@ -2,6 +2,7 @@ state("BlackOps")
 {
 	string35 currentlevelName : 0x21033E8; // Doesn't work for langagues other than English (idk why)
 	long Loader : 0x2AEA4B0;	// Changed based on timing method changes by community vote
+	bool Loader2 : 0x3CE1594;	// aciidz: this alone would probably be fine but apparently some cutscenes need to be removed from loads so we'll use this in tandem with the other one
 }
 
 startup 
@@ -62,7 +63,7 @@ update
 
 start
 {
-    return ((current.currentlevelName == "cuba") && (current.Loader != 0));
+    return ((current.currentlevelName == "cuba") && (current.Loader != 0 && !current.Loader2));
 }
 
 onStart
@@ -72,7 +73,7 @@ onStart
 
 isLoading
 {
-	return (current.Loader == 0) ||
+	return (current.Loader == 0 || current.Loader2) ||
 	(current.currentlevelName == "pentagon") || // Adding this because of the new timing method changed based on community vote
 	(current.currentlevelName == "frontend"); // Adding this just in case it because of the fact that sometimes frontend leaks during the crashed helicopter scenes (thanks 3arc)
 }
