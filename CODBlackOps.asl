@@ -31,24 +31,23 @@ startup
 	foreach (var Tag in vars.missions)
 	{
 		settings.Add(Tag.Key, true, Tag.Value, "missions");
-    };
+	};
 
 	if (timer.CurrentTimingMethod == TimingMethod.RealTime)  
-    {        
-    	var timingMessage = MessageBox.Show 
+	{        
+		var timingMessage = MessageBox.Show 
 		(
-        	"This game uses Time without Loads (Game Time) as the main timing method.\n"+
-            "LiveSplit is currently set to show Real Time (RTA).\n"+
-            "Would you like to set the timing method to Game Time? This will make verification easier",
-            "LiveSplit | Call of Duty: Black Ops",
-           MessageBoxButtons.YesNo,MessageBoxIcon.Question
-        );
-        
-        if (timingMessage == DialogResult.Yes)
-        {
-            timer.CurrentTimingMethod = TimingMethod.GameTime;
+			"This game uses Time without Loads (Game Time) as the main timing method.\n"+
+			"LiveSplit is currently set to show Real Time (RTA).\n"+
+			"Would you like to set the timing method to Game Time? This will make verification easier",
+			"LiveSplit | Call of Duty: Black Ops",
+		   MessageBoxButtons.YesNo,MessageBoxIcon.Question
+		);
+		if (timingMessage == DialogResult.Yes)
+		{
+			timer.CurrentTimingMethod = TimingMethod.GameTime;
 		}
-    }	
+	}
 }
 
 init
@@ -58,11 +57,12 @@ init
 
 update
 {
+	
 }
 
 start
 {
-    return ((current.currentlevelName == "cuba") && (current.Loader != 0 && !current.Loader2));
+	return ((current.currentlevelName == "cuba") && (current.Loader != 0 && !current.Loader2));
 }
 
 onStart
@@ -84,7 +84,7 @@ reset
 
 split
 {
-    if (current.currentlevelName != old.currentlevelName && settings.ContainsKey(current.currentlevelName) && settings[current.currentlevelName]) // If on a different map, the map exists in settings, and the setting is enabled
+	if (current.currentlevelName != old.currentlevelName && settings.ContainsKey(current.currentlevelName) && settings[current.currentlevelName]) // If on a different map, the map exists in settings, and the setting is enabled
   	{
 		if (current.currentlevelName == "pentagon") // if we're on USDD
 		{
