@@ -2,7 +2,7 @@ state("BlackOps")
 {
 	string35 currentlevelName : 0x21033E8; // Doesn't work for langagues other than English (idk why)
 	long Loader : 0x2AEA4B0;	// Changed based on timing method changes by community vote
-	bool Loader2 : 0x3CE1594;	// aciidz: this alone would likely be fine to remove actual loads, but it doesn't pause for cutscenes, so use both
+	bool Loader2 : 0x3CE1594;	// aciidz: covers actual loads more accurately, doesn't cover cutscenes
 }
 
 startup 
@@ -72,26 +72,31 @@ onStart
 
 isLoading
 {
-	return (current.Loader == 0 || current.Loader2) ||
-			(current.currentlevelName == "pentagon") || // Adding this because of the new timing method changed based on community vote
-			(current.currentlevelName == "frontend"); // Adding this just in case it because of the fact that sometimes frontend leaks during the crashed helicopter scenes (thanks 3arc)
+	// if loading, pause the timer. if on USDD (pentagon), pause the timer. if on main menu, pause the timer (for USDD skip).
+	return (current.Loader == 0 || current.Loader2) || (current.currentlevelName == "pentagon") || (current.currentlevelName == "frontend");
 }
 
 reset
 {
-	return ((current.currentlevelName == "frontend") && (old.currentlevelName != "frontend") && (old.currentlevelName != "pentagon")); // adding old.currentlevelName != frontend fixes timer resetting when doing USDD skip (since only checking if the level is not pentagon basically just delays the reset by 1 autosplitter refresh cycle)
+	// adding old.currentlevelName != frontend fixes timer resetting when doing USDD skip
+	// only checking against pentagon would just delay the reset by 1 autosplitter refresh cycle
+	return ((current.currentlevelName == "frontend") && (old.currentlevelName != "frontend") && (old.currentlevelName != "pentagon"));
 }
 
 split
 {
-	if (current.currentlevelName != old.currentlevelName && settings.ContainsKey(current.currentlevelName) && settings[current.currentlevelName]) // If on a different map, the map exists in settings, and the setting is enabled
+	// If on a different map, the map exists in settings, and the setting is enabled
+	if (current.currentlevelName != old.currentlevelName && settings.ContainsKey(current.currentlevelName) && settings[current.currentlevelName])
   	{
-		if (current.currentlevelName == "pentagon") // if we're on USDD
+		// If we're on USDD, do USDD skip logic
+		if (current.currentlevelName == "pentagon")
 		{
-			vars.USDDtime = true; // adds game time of 4:55
+			// Add game time of 4:55
+			vars.USDDtime = true;
 			return true;
 		}
-		else // if not on USDD split
+		// We're not on USDD, so just return true
+		else
 		{
 			return true;
 		}
@@ -103,6 +108,6 @@ gameTime
 	if (vars.USDDtime == true) 
 	{					
 		vars.USDDtime = false;
-		return timer.CurrentTime.GameTime.Value.Add(new TimeSpan (0, 4, 55));	//Time taken from the mean of most of the submitted any% runs
+		return timer.CurrentTime.GameTime.Value.Add(new TimeSpan (0, 4, 55)); // Time taken from the mean of most of the submitted any% runs
 	}
 }
