@@ -1,14 +1,13 @@
 state("BlackOps")
 {
-	string35 currentlevelName : 0x21033E8; // Doesn't work for langagues other than English (idk why)
-	long Loader : 0x2AEA4B0;	// Changed based on timing method changes by community vote
-	bool Loader2 : 0x3CE1594;	// aciidz: covers actual loads more accurately, doesn't cover cutscenes
+	string35 levelName : 0x21033E8;
+	long Loader : 0x2AEA4B0;	// covers loads ineffectively, handles cutscenes that are supposed to be removed from timing
+	bool Loader2 : 0x3CE1594;	// covers actual loads more accurately, doesn't cover cutscenes
 }
 
 startup 
 {
-	settings.Add("missions", true, "All Missions"); // Decided to add this just so it's like all the other ones
-
+	settings.Add("missions", true, "All Missions");
 	vars.missions = new Dictionary<string,string> 
 	{ 
 	  	{"vorkuta", "Vorkuta"},
@@ -27,7 +26,6 @@ startup
 		{"underwaterbase", "Redemption"},
 		{"outro", "Menu Screen"},
 	}; 
-	
 	foreach (var Tag in vars.missions)
 	{
 		settings.Add(Tag.Key, true, Tag.Value, "missions");
@@ -41,18 +39,13 @@ startup
 			"LiveSplit is currently set to show Real Time (RTA).\n"+
 			"Would you like to set the timing method to Game Time? This will make verification easier",
 			"LiveSplit | Call of Duty: Black Ops",
-		   MessageBoxButtons.YesNo,MessageBoxIcon.Question
+			MessageBoxButtons.YesNo,MessageBoxIcon.Question
 		);
 		if (timingMessage == DialogResult.Yes)
 		{
 			timer.CurrentTimingMethod = TimingMethod.GameTime;
 		}
 	}
-}
-
-init
-{
-	vars.USDDtime = false;
 }
 
 update
@@ -62,7 +55,7 @@ update
 
 start
 {
-	return ((current.currentlevelName == "cuba") && (current.Loader != 0 && !current.Loader2));
+	return ((current.levelName == "cuba") && (current.Loader != 0 && !current.Loader2));
 }
 
 onStart
@@ -73,33 +66,27 @@ onStart
 isLoading
 {
 	// if loading, pause the timer. if on USDD (pentagon), pause the timer. if on main menu, pause the timer (for USDD skip).
-	return (current.Loader == 0 || current.Loader2) || (current.currentlevelName == "pentagon") || (current.currentlevelName == "frontend");
+	return (current.Loader == 0 || current.Loader2) || (current.levelName == "pentagon") || (current.levelName == "frontend");
 }
 
 reset
 {
-	// adding old.currentlevelName != frontend fixes timer resetting when doing USDD skip
-	// only checking against pentagon would just delay the reset by 1 autosplitter refresh cycle
-	return ((current.currentlevelName == "frontend") && (old.currentlevelName != "frontend") && (old.currentlevelName != "pentagon"));
+	// reset if we just quit to the main menu, and the level we are quitting from is not USDD
+	return ((current.levelName == "frontend") && (old.levelName != "frontend") && (old.levelName != "pentagon"));
 }
 
 split
 {
 	// If on a different map, the map exists in settings, and the setting is enabled
-	if (current.currentlevelName != old.currentlevelName && settings.ContainsKey(current.currentlevelName) && settings[current.currentlevelName])
+	if (current.levelName != old.levelName && settings.ContainsKey(current.levelName) && settings[current.levelName])
   	{
-		// If we're on USDD, do USDD skip logic
-		if (current.currentlevelName == "pentagon")
+		// If we're on USDD...
+		if (current.levelName == "pentagon")
 		{
 			// Add game time of 4:55
 			vars.USDDtime = true;
-			return true;
 		}
-		// We're not on USDD, so just return true
-		else
-		{
-			return true;
-		}
+		return true;
 	}
 }
 
@@ -108,6 +95,7 @@ gameTime
 	if (vars.USDDtime == true) 
 	{					
 		vars.USDDtime = false;
-		return timer.CurrentTime.GameTime.Value.Add(new TimeSpan (0, 4, 55)); // Time taken from the mean of most of the submitted any% runs
+		// 4:55 is the time taken from the mean of most of the submitted any% runs
+		return timer.CurrentTime.GameTime.Value.Add(new TimeSpan (0, 4, 55));
 	}
 }
