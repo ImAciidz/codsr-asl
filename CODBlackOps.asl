@@ -65,13 +65,15 @@ onStart
 
 isLoading
 {
-	// if loading, pause the timer. if on USDD (pentagon), pause the timer. if on main menu, pause the timer (for USDD skip).
+	// Pause the timer if we're loading, or on USDD, or we're on the main menu for USDD skip
+	// In the future, the logic should be improved to only pause the timer when actually skipping
+	// USDD, since it doesn't make sense to just always pause the timer on the main menu
 	return (current.Loader == 0 || current.Loader2) || (current.levelName == "pentagon") || (current.levelName == "frontend");
 }
 
 reset
 {
-	// reset if we just quit to the main menu, and the level we are quitting from is not USDD
+	// Reset if we just quit to the main menu, and the level we are quitting from is not USDD
 	return ((current.levelName == "frontend") && (old.levelName != "frontend") && (old.levelName != "pentagon"));
 }
 
@@ -83,7 +85,7 @@ split
 		// If we're on USDD...
 		if (current.levelName == "pentagon")
 		{
-			// Add game time of 4:55
+			// See gameTime block below
 			vars.USDDtime = true;
 		}
 		return true;
